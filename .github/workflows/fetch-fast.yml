@@ -1,0 +1,54 @@
+name: Fetch VIX + Fear & Greed
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # every 5 minutes
+  workflow_dispatch:
+
+# Only one run at a time — prevents overlap when the loop runs close to 5 min
+concurrency:
+  group: fetch-vix-fast
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch Fear & Greed + VIX weekly (once per cycle)
+        run: python scripts/fetch_fast.py
+
+      - name: Commit Fear & Greed + VIX weekly
+        run: |
+          git add data/fear-greed.json data/vix-weekly.json
+          git diff --staged --quiet || git commit -m "fast: $(date -u '+%H:%M UTC')"
+          git push
+
+      - name: VIX intraday loop — push every ~55s for up to 4 minutes
+        run: |
+          END_TIME=$(( $(date +%s) + 240 ))
+          while [ $(date +%s) -lt $END_TIME ]; do
+            python scripts/fetch_vix_intraday.py
+            git add data/vix-intraday.json
+            git diff --staged --quiet || git commit -m "vix: $(date -u '+%H:%M:%S UTC')"
+            git push
+            REMAINING=$(( END_TIME - $(date +%s) ))
+            [ $REMAINING -gt 55 ] && sleep 55 || break
+          done
