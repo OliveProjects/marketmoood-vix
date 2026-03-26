@@ -37,7 +37,7 @@ jobs:
 
       - name: Commit Fear & Greed + VIX weekly
         run: |
-          git add data/fear-greed.json data/vix-weekly.json
+          git add data/
           git diff --staged --quiet || git commit -m "fast: $(date -u '+%H:%M UTC')"
           git push
 
@@ -46,7 +46,7 @@ jobs:
           END_TIME=$(( $(date +%s) + 240 ))
           while [ $(date +%s) -lt $END_TIME ]; do
             python scripts/fetch_vix_intraday.py
-            git add data/vix-intraday.json
+            git add data/
             git diff --staged --quiet || git commit -m "vix: $(date -u '+%H:%M:%S UTC')"
             git push
             REMAINING=$(( END_TIME - $(date +%s) ))
