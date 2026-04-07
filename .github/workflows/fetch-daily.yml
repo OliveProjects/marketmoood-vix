@@ -5,6 +5,11 @@ on:
     - cron: '10 22 * * *'   # 22:10 UTC daily (after US market close)
   workflow_dispatch:
 
+# Queue behind fetch-fast.yml to avoid mid-loop push conflicts
+concurrency:
+  group: fetch-vix-fast
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
