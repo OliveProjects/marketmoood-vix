@@ -41,6 +41,7 @@ jobs:
         run: |
           git add data/
           git diff --staged --quiet || git commit -m "fast: $(date -u '+%H:%M UTC')"
+          git pull --rebase origin main
           git push
 
       - name: VIX intraday loop — push every ~55s for up to 4 minutes
@@ -50,6 +51,7 @@ jobs:
             python scripts/fetch_vix_intraday.py
             git add data/
             git diff --staged --quiet || git commit -m "vix: $(date -u '+%H:%M:%S UTC')"
+            git pull --rebase origin main
             git push
             REMAINING=$(( END_TIME - $(date +%s) ))
             [ $REMAINING -gt 55 ] && sleep 55 || break
