@@ -2,7 +2,8 @@ name: Fetch VIX + Fear & Greed
 
 on:
   schedule:
-    - cron: '*/5 * * * *'   # every 5 minutes
+    - cron: '*/5 7-18 * * 1-5'   # Mon-Fri 07:00-18:55 UTC = 09:00-20:55 CEST
+    - cron: '0 19 * * 1-5'        # final run 19:00 UTC = 21:00 CEST
   workflow_dispatch:
 
 # Only one run at a time — prevents overlap when the loop runs close to 5 min
